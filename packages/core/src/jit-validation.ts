@@ -189,11 +189,11 @@ export function jitValidate<T>(classType: ClassType<T>): (value: any, path?: str
         }
 
         const notOptionalCheckThrow = property.isActualOptional() || property.hasDefaultValue ? '' : `_errors.push(new ValidationError(_path + '${property.name}', 'required', 'Required value is undefined or null'));`;
-        let valueGetter = `_data.${originProperty.name}`;
+        let valueGetter = `_data.['${originProperty.name}']`;
         if (isDecorated) {
             const resolvedClassType = 'resolvedClassType_' + originProperty.name;
             context.set(resolvedClassType, originProperty.resolveClassType);
-            valueGetter = `_data.${originProperty.name} instanceof ${resolvedClassType} ? _data.${originProperty.name}.${property.name} : _data.${originProperty.name}`;
+            valueGetter = `_data.['${originProperty.name}'] instanceof ${resolvedClassType} ? _data.['${originProperty.name}'].['${property.name}'] : _data.['${originProperty.name}']`;
         }
         checks.push(`
         var value = ${valueGetter};
