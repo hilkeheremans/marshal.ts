@@ -51,7 +51,7 @@
       "!index.ts"
     ],
     "testPathIgnorePatterns": [
-        "packages/benchmark"
+      "packages/benchmark"
     ],
     "transform": {
       "^.+\\.(ts|tsx)$": "ts-jest"

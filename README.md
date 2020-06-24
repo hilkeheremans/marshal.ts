@@ -8,38 +8,38 @@
 [![npm version](https://badge.fury.io/js/%40marcj%2Fmarshal.svg)](https://badge.fury.io/js/%40marcj%2Fmarshal)
 [![Coverage Status](https://coveralls.io/repos/github/marcj/marshal.ts/badge.svg?branch=master#)](https://coveralls.io/github/marcj/marshal.ts?branch=master)
 
-Marshal is the **by far fastest** Javascript validation and serialization implementation to [marshal](https://en.wikipedia.org/wiki/Marshalling_(computer_science))
+Marshal is the **by far fastest** Javascript validation and serialization implementation to [marshal](<https://en.wikipedia.org/wiki/Marshalling_(computer_science)>)
 JSON-representable data from JSON objects to class instances to database records and vice versa, written in and for TypeScript. Marshal uses
 a JIT engine, generating highly optimized serialization functions on the fly. Marshal is an addition to JSON.parse(), not a replacement.
 
-Marshal introduces the concept of decorating your entity class or class methods *once* with all
+Marshal introduces the concept of decorating your entity class or class methods _once_ with all
 necessary decorators (like type declaration, indices, and relations) using only Marshal's TypeScript decorators
 agnostic to any serialization target by saving only the meta data,
 and then use it everywhere: frontend, backend, CLI, database records, http-transport, rpc serialization, query parameter, DTOs, and database, including validations.
 
 ## Features
 
-* [Fastest serialization and validation](#benchmark) thanks to a JIT engine. It's the the by far fastest serialization library for both, Nodejs and browsers.
-* Supported types: String, Number, Boolean, Date, Moment.js, ArrayBuffer (binary), custom classes, Array, object maps, any.
-* Typed arrays: Int8Array, Uint8Array, Uint8ClampedArray, Int16Array, Uint16Array, Int32Array, Uint32Array, Float32Array, Float64Array
-* Cross referencing/Circular references using `@f.forwardRef`
-* Constructor support (required property can be placed in constructor) making it suitable for Typescript strict compiling
-* Validation: Built-in, custom class and inline validators
-* Decorated property values (e.g. JSON uses plain Array<string>, class instance uses a custom Collection<String> class)
-* Partial/Patch marshalling (ideal for serialising [JSON Patch](http://jsonpatch.com/) and the like)
-* Complex models with parent references
-* Support declaring method arguments and return type for method serialization
-* Implicit type detection as far as Typescript allows it technically
-* Supports getters
-* One decorator for all. Best and mist efficient UX possible, with full type hinting support
-* Soft type castings (so implicit cast from number -> string, if necessary)
-* NestJS validation pipe
-* MongoDB database abstraction and query builder with relation and join support
+- [Fastest serialization and validation](#benchmark) thanks to a JIT engine. It's the the by far fastest serialization library for both, Nodejs and browsers.
+- Supported types: String, Number, Boolean, Date, Moment.js, ArrayBuffer (binary), custom classes, Array, object maps, any.
+- Typed arrays: Int8Array, Uint8Array, Uint8ClampedArray, Int16Array, Uint16Array, Int32Array, Uint32Array, Float32Array, Float64Array
+- Cross referencing/Circular references using `@f.forwardRef`
+- Constructor support (required property can be placed in constructor) making it suitable for Typescript strict compiling
+- Validation: Built-in, custom class and inline validators
+- Decorated property values (e.g. JSON uses plain Array<string>, class instance uses a custom Collection<String> class)
+- Partial/Patch marshalling (ideal for serialising [JSON Patch](http://jsonpatch.com/) and the like)
+- Complex models with parent references
+- Support declaring method arguments and return type for method serialization
+- Implicit type detection as far as Typescript allows it technically
+- Supports getters
+- One decorator for all. Best and mist efficient UX possible, with full type hinting support
+- Soft type castings (so implicit cast from number -> string, if necessary)
+- NestJS validation pipe
+- MongoDB database abstraction and query builder with relation and join support
 
 ## Todo
 
-* Add type support for native Map<T, K> and Set<T> classes
-* Add more built-in validators
+- Add type support for native Map<T, K> and Set<T> classes
+- Add more built-in validators
 
 ![Diagram](https://raw.github.com/marcj/marshal.ts/master/assets/diagram.png)
 
@@ -70,64 +70,60 @@ Make sure to import 'reflect-metadata' in your entry point scripts.
 
 ```typescript
 import 'reflect-metadata';
-import {
-    f,
-    plainToClass,
-    uuid,
-} from '@marcj/marshal';
+import { f, plainToClass, uuid } from '@marcj/marshal';
 
 class SubModel {
-    @f label: string;
+  @f label: string;
 }
 
 export enum Plan {
-    DEFAULT,
-    PRO,
-    ENTERPRISE,
+  DEFAULT,
+  PRO,
+  ENTERPRISE,
 }
 
 class SimpleModel {
-    @f.primary().uuid()
-    id: string = uuid();
+  @(f.primary().uuid())
+  id: string = uuid();
 
-    @f.array(String)
-    tags: string[] = [];
+  @f.array(String)
+  tags: string[] = [];
 
-    @f.optional() //binary
-    picture?: ArrayBuffer;
+  @f.optional() //binary
+  picture?: ArrayBuffer;
 
-    @f
-    type: number = 0;
+  @f
+  type: number = 0;
 
-    @f.enum(Plan, /*allowLabelsAsValue=*/ true)
-    plan: Plan = Plan.DEFAULT;
+  @f.enum(Plan, /*allowLabelsAsValue=*/ true)
+  plan: Plan = Plan.DEFAULT;
 
-    @f.enum(Plan).asArray()
-    plans: Plan[] = [];
+  @(f.enum(Plan).asArray())
+  plans: Plan[] = [];
 
-    @f
-    created: Date = new Date;
+  @f
+  created: Date = new Date();
 
-    @f.array(SubModel)
-    children: SubModel[] = [];
+  @f.array(SubModel)
+  children: SubModel[] = [];
 
-    @f.map(SubModel)
-    childrenMap: {[key: string]: SubModel} = {};
+  @f.map(SubModel)
+  childrenMap: { [key: string]: SubModel } = {};
 
-    constructor(
-        @f.index().asName('name') //asName is required for minimized code
-        public name: string
-    ) {}
+  constructor(
+    @(f.index().asName('name')) //asName is required for minimized code
+    public name: string,
+  ) {}
 }
 
 //data comes usually from files or http request
 const instance = plainToClass(SimpleModel, {
-    name: 'myName',
-    tags: ['foo', 'bar'],
-    plan: 'PRO',
-    created: 'Sat Oct 13 2018 14:17:35 GMT+0200',
-    children: [{label: 'foo'}],
-    childrenMap: {'foo': {label: 'foo'}},
+  name: 'myName',
+  tags: ['foo', 'bar'],
+  plan: 'PRO',
+  created: 'Sat Oct 13 2018 14:17:35 GMT+0200',
+  children: [{ label: 'foo' }],
+  childrenMap: { foo: { label: 'foo' } },
 });
 console.log(instance);
 /*
@@ -157,30 +153,27 @@ Tests were conducted on a Macbook Pro i9 with 2,9 GHz.
 On real server hardware with Linux this numbers are easily halved.
 
 The class structure in question:
+
 ```typescript
 import 'reflect-metadata';
-import {f, plainToClass} from "@marcj/marshal";
+import { f, plainToClass } from '@marcj/marshal';
 
 export class MarshalModel {
-    @f ready?: boolean;
+  @f ready?: boolean;
 
-    @f.array(String) tags: string[] = [];
+  @f.array(String) tags: string[] = [];
 
-    @f priority: number = 0;
+  @f priority: number = 0;
 
-    constructor(
-        @f public id: number,
-        @f public name: string
-    ) {
-    }
+  constructor(@f public id: number, @f public name: string) {}
 }
 
 plainToClass(MarshalModel, {
-    name: 'name',
-    id: 1,
-    tags: ['a', 'b', 'c'],
-    priority: 5,
-    ready: true,
+  name: 'name',
+  id: 1,
+  tags: ['a', 'b', 'c'],
+  priority: 5,
+  ready: true,
 });
 ```
 
@@ -189,8 +182,9 @@ Converting **100,000 elements** from json to class instances (plainToClass) take
 Converting **100,000 elements** from class instances to JSON objects (classToPlain) takes about **0.000089 per item**, in total 9ms.
 
 **Compared to class-transformer**:
- 1. classToPlain takes 2748ms. Marshal is up to 30500% faster.
- 2. plainToClass takes 2605ms. Marshal is up to 21700% faster.
+
+1.  classToPlain takes 2748ms. Marshal is up to 30500% faster.
+2.  plainToClass takes 2605ms. Marshal is up to 21700% faster.
 
 Another comparison: Creating manually new class instances and assign properties is only barely faster.
 
@@ -199,7 +193,7 @@ const instance = new MarshalModel(1, 'name');
 instance.tags = ['a', 'b', 'c'];
 instance.priority = 5;
 instance.ready = true;
-````
+```
 
 Doing this 100,000 times takes 12.349ms instead of 18.483ms with Marshal.
 
@@ -214,13 +208,13 @@ that Marshal is 64x faster than `ajv` and 3.6x faster than `quartet`.
 Example:
 
 ```typescript
-import {jitValidate} from '@marcj/marshal';
+import { jitValidate } from '@marcj/marshal';
 const data = {
-    name: 'name1',
-    id: 1,
-    tags: ['a', 2, 'c'],
-    priority: 5,
-    ready: true,
+  name: 'name1',
+  id: 1,
+  tags: ['a', 2, 'c'],
+  priority: 5,
+  ready: true,
 };
 const validateMarshalModel = jitValidate(MarshalModel);
 const errors = validateMarshalModel(data);
@@ -238,14 +232,14 @@ won't be serialized. Their value will be dropped.
 
 ### Serialization
 
-* JSON object to class instance (`plainToClass`).
-* JSON object to mongo record (`plainToMongo`).
+- JSON object to class instance (`plainToClass`).
+- JSON object to mongo record (`plainToMongo`).
 
-* class instance to JSON object (`classToPlain`).
-* class instance to mongo record (`classToMongo`).
+- class instance to JSON object (`classToPlain`).
+- class instance to mongo record (`classToMongo`).
 
-* mongo record to class instance (`mongoToClass`).
-* mongo record to JSON object (`mongoToPlain`).
+- mongo record to class instance (`mongoToClass`).
+- mongo record to JSON object (`mongoToPlain`).
 
 Note: 'JSON object' is not a string, but an object with valid JSON values, which can then
 be used to serialise to JSON string using JSON.stringify(classToPlain(SimpleModel, ...)).
@@ -259,63 +253,62 @@ First make sure you have some validators attached to your fields you want to val
 ```typescript
 import 'jest';
 import 'reflect-metadata';
-import {f, validate, ValidationError, validatedPlainToClass, plainToClass} from '@marcj/marshal';
+import { f, validate, ValidationError, validatedPlainToClass, plainToClass } from '@marcj/marshal';
 
 class Page {
-    @f
-    name: string;
-    
-    @f
-    age: number;
+  @f
+  name: string;
+
+  @f
+  age: number;
 }
 
-const errors = validate(Page, {name: 'peter'});
+const errors = validate(Page, { name: 'peter' });
 expect(errors.length).toBe(1);
 expect(errors[0]).toBeInstanceOf(ValidationError);
 expect(errors[0].path).toBe('age');
 expect(errors[0].message).toBe('Required value is undefined or null');
 if (errors.length === 0) {
-    const page = plainToClass(Page, {name: 'peter'});
+  const page = plainToClass(Page, { name: 'peter' });
 }
 
 //or do both at the same time and throw error if validations fails
-const page = validatedPlainToClass(Page, {name: 'peter'});
-````
+const page = validatedPlainToClass(Page, { name: 'peter' });
+```
 
 You can also write custom validators
 
 ```typescript
-import {f, PropertyValidatorError, PropertyValidator} from '@marcj/marshal';
+import { f, PropertyValidatorError, PropertyValidator } from '@marcj/marshal';
 
 class MyCustomValidator implements PropertyValidator {
-     validate<T>(value: any): PropertyValidatorError {
-         if (value.length > 10) {
-             return new PropertyValidatorError('too_long', 'Too long :()');
-         }
-     };
+  validate<T>(value: any): PropertyValidatorError {
+    if (value.length > 10) {
+      return new PropertyValidatorError('too_long', 'Too long :()');
+    }
+  }
 }
 
 class Entity {
-    @f.validator(MyCustomValidator)
-    name: string;
+  @f.validator(MyCustomValidator)
+  name: string;
 }
 ```
 
 or inline validators
 
 ```typescript
-import {f, PropertyValidatorError} from '@marcj/marshal';
+import { f, PropertyValidatorError } from '@marcj/marshal';
 
 class Entity {
-    @f.validator((value: any) => {
-        if (value.length > 10) {
-            return new PropertyValidatorError('too_long', 'Too long :()');
-        }
-    })
-    name: string;
+  @f.validator((value: any) => {
+    if (value.length > 10) {
+      return new PropertyValidatorError('too_long', 'Too long :()');
+    }
+  })
+  name: string;
 }
 ```
-
 
 ### Partial serialization
 
@@ -323,11 +316,11 @@ Most of the time, you want to have full class instances so the internal state is
 However, if you have a patch mechanism, use JSON Patch, or just want to change one field value in the database,
 you might have the need to serialize only one field.
 
-* partialPlainToClass
-* partialClassToPlain
-* partialClassToMongo
-* partialPlainToMongo
-* partialMongoToPlain
+- partialPlainToClass
+- partialClassToPlain
+- partialClassToMongo
+- partialPlainToMongo
+- partialMongoToPlain
 
 ## `@f` decorator: define types
 
@@ -341,30 +334,30 @@ This duplication in defining the type is necessary since Typescript's reflection
 Example valid decoration:
 
 ```typescript
-import {f} from '@marcj/marshal';
+import { f } from '@marcj/marshal';
 
 class Page {
-    @f.optional() //will be detected as String
-    name?: string;
-    
-    @f.array(String) //will be detected as String array
-    name: string[] = [];
-    
-    @f.map(String) //will be detected as String map
-    name: {[name: string]: string} = {};
-}
-````
+  @f.optional() //will be detected as String
+  name?: string;
 
-Example *not* valid decorators:
+  @f.array(String) //will be detected as String array
+  name: string[] = [];
+
+  @f.map(String) //will be detected as String map
+  name: { [name: string]: string } = {};
+}
+```
+
+Example _not_ valid decorators:
 
 ```typescript
-import {f} from '@marcj/marshal';
+import { f } from '@marcj/marshal';
 
 class Page {
-    @f //can't be detected, you get an error with further instructions
-    name;
+  @f //can't be detected, you get an error with further instructions
+  name;
 }
-````
+```
 
 More examples:
 
@@ -381,7 +374,7 @@ class MyModel {
 
     @f
     created: Date = new Date;
-    
+
     @f.moment()
     modified?: moment.Moment = moment();
 }
@@ -394,46 +387,50 @@ This can be useful for building custom RPC interfaces.
 
 ```typescript
 import {
-    f, PartialField, argumentClassToPlain, argumentPlainToClass,
-    methodResultClassToPlain, methodResultPlainToClass,
+  f,
+  PartialField,
+  argumentClassToPlain,
+  argumentPlainToClass,
+  methodResultClassToPlain,
+  methodResultPlainToClass,
 } from '@marcj/marshal';
 
 class Config {
-    @f.optional()
-    name?: string;
+  @f.optional()
+  name?: string;
 
-    @f.optional()
-    sub?: Config;
+  @f.optional()
+  sub?: Config;
 
-    @f
-    prio: number = 0;
+  @f
+  prio: number = 0;
 }
 
 class Controller {
-    @f.partial(Config) //this defines the return type.
-    foo(name: string): PartialField<Config> {
-        return {prio: 2, 'sub.name': name};
-    }
+  @f.partial(Config) //this defines the return type.
+  foo(name: string): PartialField<Config> {
+    return { prio: 2, 'sub.name': name };
+  }
 
-    @f //this register the function. `Config` type can be retrieve by TS reflection
-    bar(config: Config): Config {
-        config.name = 'peter';
-        return config;
-    }
-    
-    @f.array(Number) //return type. Necessary to specify array, since `number[]` is not inferable
-    another(@f.array(String) names: string[]): number[] {
-        return [1, 2];
-    }
+  @f //this register the function. `Config` type can be retrieve by TS reflection
+  bar(config: Config): Config {
+    config.name = 'peter';
+    return config;
+  }
+
+  @f.array(Number) //return type. Necessary to specify array, since `number[]` is not inferable
+  another(@f.array(String) names: string[]): number[] {
+    return [1, 2];
+  }
 }
 
 //from class to transport layer
 const arg0 = argumentClassToPlain(Controller, 'foo', 0, 2); //'2'
-const res = methodResultClassToPlain(Controller, 'foo', {'sub.name': 3}); //{'sub.name': '3'}
+const res = methodResultClassToPlain(Controller, 'foo', { 'sub.name': 3 }); //{'sub.name': '3'}
 
-//from transport layer to 
-const arg0 = argumentPlainToClass(Controller, 'bar', 0, {prio: '2'}); //Config {}
-const res = methodResultPlainToClass(Controller, 'bar', {'sub': {name: 3}}); //Config {}
+//from transport layer to
+const arg0 = argumentPlainToClass(Controller, 'bar', 0, { prio: '2' }); //Config {}
+const res = methodResultPlainToClass(Controller, 'bar', { sub: { name: 3 } }); //Config {}
 ```
 
 ### Moment.js
@@ -461,17 +458,17 @@ have more control.
 Note: Fields that are not decorated with `@f` are not mapped and will be excluded per default.
 
 ```typescript
-import {f} from '@marcj/marshal';
+import { f } from '@marcj/marshal';
 
 class MyEntity {
-    @f.primary().mongoId()
-    id: string;
-    
-    @f.exclude()
-    internalState: string;
+  @(f.primary().mongoId())
+  id: string;
 
-    @f.exclude('mongo')
-    publicState: string;
+  @f.exclude()
+  internalState: string;
+
+  @f.exclude('mongo')
+  publicState: string;
 }
 ```
 
@@ -483,30 +480,27 @@ as reference. Properties that used `@ParentReference` are automatically excluded
 in `*ToPlain` and `*ToMongo` functions.
 
 ```typescript
-import {f, ParentReference, plainToClass} from '@marcj/marshal';
+import { f, ParentReference, plainToClass } from '@marcj/marshal';
 
 class Page {
-    @f
-    name: string;
-    
-    @f.array(Page)
-    children: Page[] = [];
-    
-    @f.type(Page)
-    @ParentReference()
-    parent?: Page;
+  @f
+  name: string;
+
+  @f.array(Page)
+  children: Page[] = [];
+
+  @f.type(Page)
+  @ParentReference()
+  parent?: Page;
 }
 
 const root = plainToClass(Page, {
-    name: 'Root',
-    children: [
-        {name: 'Child 1'},
-        {name: 'Child 2'},
-    ]
-})
+  name: 'Root',
+  children: [{ name: 'Child 1' }, { name: 'Child 2' }],
+});
 
 root.children[0].parent === root; //true
-````
+```
 
 ### OnLoad(options?: {fullLoad?: boolean})
 
@@ -519,17 +513,17 @@ of objects has been created, which means when all parents and siblings
 are fully initialised.
 
 ```typescript
-import {f, OnLoad} from '@marcj/marshal';
+import { f, OnLoad } from '@marcj/marshal';
 class Page {
-    @f
-    name: string;
-    
-    @OnLoad()
-    onLoad() {
-        console.log('initialised');
-    }
+  @f
+  name: string;
+
+  @OnLoad()
+  onLoad() {
+    console.log('initialised');
+  }
 }
-````
+```
 
 ### Value decorator
 
@@ -539,36 +533,34 @@ different. This is useful if you have in the actual class instance
 example `string[]` => `ChildrenCollection`.
 
 ```typescript
-import {f} from '@marcj/marshal';
+import { f } from '@marcj/marshal';
 class ChildrenCollection {
-    
-    constructor(
-        @f.array(String).decorated()
-        public items: string[]
-    ) {
-    }
-    
-    public add(item: string) {
-        this.items.push(item);
-    }
+  constructor(
+    @(f.array(String).decorated())
+    public items: string[],
+  ) {}
+
+  public add(item: string) {
+    this.items.push(item);
+  }
 }
 
 class MyEntity {
-    @f.primary().mongoId()
-    _id: string;
-    
-    //in *toMongo and *toPlain is children the value of ChildrenCollection::items
-    @f.type(ChildrenCollection)
-    children: ChildrenCollection = new ChildrenCollection([]);
+  @(f.primary().mongoId())
+  _id: string;
+
+  //in *toMongo and *toPlain is children the value of ChildrenCollection::items
+  @f.type(ChildrenCollection)
+  children: ChildrenCollection = new ChildrenCollection([]);
 }
 ```
 
-`ChildrenCollection` is now always used in *toClass calls. The
+`ChildrenCollection` is now always used in \*toClass calls. The
 constructor of ChildrenCollection receives the actual value as
 first argument.
 
 ```typescript
-import {classToPlain} from '@marcj/marshal';
+import { classToPlain } from '@marcj/marshal';
 
 const entity = new MyEntity();
 entity.children.add('Foo');
@@ -580,23 +572,23 @@ result = {
     children: ['Foo', 'Bar']
 }
 */
-````
+```
 
 If you read values from mongo or plain to class (mongoToClass,
 plainToClass) your decorator will be used again and receives as first
 argument the actual property value:
 
 ```typescript
-import {classToPlain} from '@marcj/marshal';
+import { classToPlain } from '@marcj/marshal';
 
 const entity = plainToClass(MyEntity, {
-    id: 'abcde',
-    children: ['Foo', 'Bar']
+  id: 'abcde',
+  children: ['Foo', 'Bar'],
 });
 entity.children instanceof ChildrenCollection; //true
 
 //so you can work with it again
-entity.children.add('Bar2'); 
+entity.children.add('Bar2');
 ```
 
 ### Discriminated Union
@@ -605,24 +597,24 @@ entity.children.add('Bar2');
 
 ```typescript
 class ConfigA {
-    @f.discriminant()
-    kind: 'a' = 'a';
+  @f.discriminant()
+  kind: 'a' = 'a';
 
-    @f
-    myValue: string = '';
+  @f
+  myValue: string = '';
 }
 
 class ConfigB {
-    @f.discriminant()
-    kind: 'b' = 'b';
+  @f.discriminant()
+  kind: 'b' = 'b';
 
-    @f
-    myValue2: string = '';
+  @f
+  myValue2: string = '';
 }
 
 class User {
-    @f.union(ConfigA, ConfigB)
-    config: ConfigA | ConfigB = new ConfigA;
+  @f.union(ConfigA, ConfigB)
+  config: ConfigA | ConfigB = new ConfigA();
 }
 ```
 
@@ -648,9 +640,9 @@ to create dynamically new class schemas for existing external classes or anonymo
 
 ```typescript
 class ExternalClass {
-    id!: string;
-    version!: number;
-    lists!: number[];
+  id!: string;
+  version!: number;
+  lists!: number[];
 }
 
 const schema = createClassSchema(ExternalClass);
@@ -659,9 +651,9 @@ schema.addProperty('version', f.type(Number));
 schema.addProperty('lists', f.array(Number));
 
 const obj = plainToClass(ExternalClass, {
-    id: '23',
-    version: 1,
-    lists: [12, 23]
+  id: '23',
+  version: 1,
+  lists: [12, 23],
 });
 ```
 
@@ -690,32 +682,32 @@ const obj = plainToClass(schema.classType, {
 
 If you work with rather big entities, your probably want to utilise some
 kind of patch mechanism. Marshal supports to transform partial objects as well
-with deep path properties. All of following partial* methods maintain the
+with deep path properties. All of following partial\* methods maintain the
 structure of your object and only transform the value. We resolve the dot symbol
 to retrieve type information, so you can use this also in combination with JSON-Patch.
 
 Note: partial* methods expect always a plain object and return always a plain object. For Example
 `partialPlainToClass` indicates that all values *within* that plain object needs to be plain (JSON, e.g. string for dates).
-`partialClassToString` indicates that all values *within* that plain object needs to be class instances (javascript, e.g. `Date` for dates).
+`partialClassToString` indicates that all values *within\* that plain object needs to be class instances (javascript, e.g. `Date` for dates).
 
 #### partialPlainToClass
 
 ```typescript
-import {partialPlainToClass} from '@marcj/marshal';
+import { partialPlainToClass } from '@marcj/marshal';
 
 const converted = partialPlainToClass(SimpleModel, {
-    id: 'abcde',
-    ['childrenMap.item.label']: 3 
+  id: 'abcde',
+  ['childrenMap.item.label']: 3,
 });
 
-converted['childrenMap.item.label'] === '3' //true
+converted['childrenMap.item.label'] === '3'; //true
 
 const i2 = partialPlainToClass(SimpleModel, {
-    'children': [{'label': 3}]
+  children: [{ label: 3 }],
 });
 expect(i2['children'][0]).toBeInstanceOf(SubModel);
 expect(i2['children'][0].label).toBe('3');
-````
+```
 
 #### partialClassToPlain / partialClassToMongo
 
@@ -723,22 +715,22 @@ toPlain and toMongo differ in the way, that latter will transform
 `mongoId`) and `uuid()` in different way, suitable for Mongo's binary storage.
 
 ```typescript
-import {partialClassToPlain} from '@marcj/marshal';
+import { partialClassToPlain } from '@marcj/marshal';
 
 const plain = partialClassToPlain(SimpleModel, {
-    'children.0': i.children[0],
-    'stringChildrenCollection': new StringCollectionWrapper(['Foo', 'Bar']),
-    'childrenCollection': new CollectionWrapper([new SubModel('Bar3')]),
-    'childrenCollection.1': new SubModel('Bar4'),
-    'stringChildrenCollection.0': 'Bar2',
-    'childrenCollection.2.label': 'Bar5',
+  'children.0': i.children[0],
+  stringChildrenCollection: new StringCollectionWrapper(['Foo', 'Bar']),
+  childrenCollection: new CollectionWrapper([new SubModel('Bar3')]),
+  'childrenCollection.1': new SubModel('Bar4'),
+  'stringChildrenCollection.0': 'Bar2',
+  'childrenCollection.2.label': 'Bar5',
 });
 
 expect(plain['children.0'].label).toBe('Foo');
 expect(plain['stringChildrenCollection']).toEqual(['Foo', 'Bar']);
 expect(plain['stringChildrenCollection.0']).toEqual('Bar2');
-expect(plain['childrenCollection']).toEqual([{label: 'Bar3'}]);
-expect(plain['childrenCollection.1']).toEqual({label: 'Bar4'});
+expect(plain['childrenCollection']).toEqual([{ label: 'Bar3' }]);
+expect(plain['childrenCollection.1']).toEqual({ label: 'Bar4' });
 expect(plain['childrenCollection.2.label']).toEqual('Bar5');
 ```
 
@@ -749,33 +741,33 @@ want to add another serialization target, you have to write compiler templates. 
 scarier than it is. Here's an example on how to convert a date to a ISO format for JSON transportation.
 
 ```typescript
-import {registerConverterCompiler} from '@marcj/marshal';
+import { registerConverterCompiler } from '@marcj/marshal';
 
 //from class instance values to your MyTarget type, which will be a string here
 registerConverterCompiler('class', 'MyTarget', 'date', (setter: string, accessor: string) => {
-    return `${setter} = ${accessor}.toJSON();`;
+  return `${setter} = ${accessor}.toJSON();`;
 });
 
-//from your MyTarget type to class instance values 
+//from your MyTarget type to class instance values
 registerConverterCompiler('MyTarget', 'class', 'date', (setter: string, accessor: string) => {
-    return `${setter} = new Date(${accessor});`;
+  return `${setter} = new Date(${accessor});`;
 });
 ```
 
 To use your custom target, you can use these JIT functions:
 
 ```typescript
-import {ClassType, getClassName} from "@marcj/estdlib";
-import {createClassToXFunction, createXToClassFunction} from '@marcj/marshal';
+import { ClassType, getClassName } from '@thinman/marcj-estdlib';
+import { createClassToXFunction, createXToClassFunction } from '@marcj/marshal';
 export function classToMyTarget<T>(classType: ClassType<T>, instance: T): any {
-    if (!(instance instanceof classType)) {
-        throw new Error(`Could not classToMyTarget since target is not a class instance of ${getClassName(classType)}`);
-    }
-    return createClassToXFunction(classType, 'MyTarget')(instance);
+  if (!(instance instanceof classType)) {
+    throw new Error(`Could not classToMyTarget since target is not a class instance of ${getClassName(classType)}`);
+  }
+  return createClassToXFunction(classType, 'MyTarget')(instance);
 }
 
 export function myTargetToClass<T>(classType: ClassType<T>, record: any, parents?: any[]): T {
-    return createXToClassFunction(classType, 'MyTarget')(record, parents);
+  return createXToClassFunction(classType, 'MyTarget')(record, parents);
 }
 ```
 
@@ -797,7 +789,7 @@ npm install @marcj/marshal-mongo
 ```
 
 ```typescript
-import {Database, Connection} from "@marcj/marshal-mongo";
+import { Database, Connection } from '@marcj/marshal-mongo';
 
 const database = new Database(new Connection('localhost', 'mydb', 'username', 'password'));
 
@@ -805,19 +797,17 @@ const instance = new SimpleModel('My model');
 await database.add(instance);
 
 const list = await database.query(SimpleModel).find();
-const oneItem = await database.query(SimpleModel).filter({id: 'f2ee05ad-ca77-49ea-a571-8f0119e03038'}).findOne();
+const oneItem = await database.query(SimpleModel).filter({ id: 'f2ee05ad-ca77-49ea-a571-8f0119e03038' }).findOne();
 ```
 
 More documention to come.
 
 ## NestJS / Express
 
-
 It's super common to accept data from a frontend via HTTP, transform the
 body into your class instance, work with it, and then store that data in
 your MongoDB or somewhere else. With Marshal this scenario is super
 simple and you do not need any manual transformations.
-
 
 ```
 npm install @marcj/marshal-nest
@@ -844,10 +834,10 @@ class MyController {
     ) {
         body instanceof SimpleModel; // true;
         await this.database.add(body);
-        
+
         return body.id;
     }
-    
+
     @Get('/get/:id')
     async get(@Param('id') id: string) {
         const instance = await this.database.query(SimpleModel).filter({_id: id}).findOne();
@@ -856,7 +846,7 @@ class MyController {
     }
 }
 
-````
+```
 
 ## Development of this package
 

@@ -1,88 +1,123 @@
-import {validate, ValidationFailed} from "./validation";
-import {getClassSchema, getClassTypeFromInstance, PropertySchema} from "./decorators";
-import {ClassType, eachKey, getClassName, isObject} from "@marcj/estdlib";
+import { validate, ValidationFailed } from './validation';
+import { getClassSchema, getClassTypeFromInstance, PropertySchema } from './decorators';
+import { ClassType, eachKey, getClassName, isObject } from '@thinman/marcj-estdlib';
 import {
-    createJITConverterFromPropertySchema,
-    jitClassToPlain,
-    jitPartialClassToPlain,
-    jitPartialPlainToClass,
-    jitPlainToClass
-} from "./jit";
+  createJITConverterFromPropertySchema,
+  jitClassToPlain,
+  jitPartialClassToPlain,
+  jitPartialPlainToClass,
+  jitPlainToClass,
+} from './jit';
 
 /**
  * Converts a argument of a method from class to plain.
  */
-export function argumentClassToPlain<T>(classType: ClassType<T>, methodName: string, argument: number, value: any): any {
-    const schema = getClassSchema(classType);
-    return createJITConverterFromPropertySchema('class', 'plain', schema.getMethodProperties(methodName)[argument])(value);
+export function argumentClassToPlain<T>(
+  classType: ClassType<T>,
+  methodName: string,
+  argument: number,
+  value: any,
+): any {
+  const schema = getClassSchema(classType);
+  return createJITConverterFromPropertySchema(
+    'class',
+    'plain',
+    schema.getMethodProperties(methodName)[argument],
+  )(value);
 }
 
 /**
  * Converts a result type of a method from class to plain.
  */
 export function methodResultClassToPlain<T>(classType: ClassType<T>, methodName: string, value: any): any {
-    const schema = getClassSchema(classType);
-    return createJITConverterFromPropertySchema('class', 'plain', schema.getMethod(methodName))(value);
+  const schema = getClassSchema(classType);
+  return createJITConverterFromPropertySchema('class', 'plain', schema.getMethod(methodName))(value);
 }
 
 /**
  * Converts an argument of a method from class to plain.
  */
-export function argumentPlainToClass<T>(classType: ClassType<T>, methodName: string, argument: number, value: any): any {
-    const schema = getClassSchema(classType);
-    return createJITConverterFromPropertySchema('plain', 'class', schema.getMethodProperties(methodName)[argument])(value);
+export function argumentPlainToClass<T>(
+  classType: ClassType<T>,
+  methodName: string,
+  argument: number,
+  value: any,
+): any {
+  const schema = getClassSchema(classType);
+  return createJITConverterFromPropertySchema(
+    'plain',
+    'class',
+    schema.getMethodProperties(methodName)[argument],
+  )(value);
 }
 
 /**
  * Converts a single property value.
  */
-export function propertyClassToPlain<T>(classType: ClassType<T>, propertyName: string, propertyValue: any, propertySchema?: PropertySchema) {
-    return createJITConverterFromPropertySchema('class', 'plain', propertySchema || getClassSchema(classType).getProperty(propertyName))(propertyValue);
+export function propertyClassToPlain<T>(
+  classType: ClassType<T>,
+  propertyName: string,
+  propertyValue: any,
+  propertySchema?: PropertySchema,
+) {
+  return createJITConverterFromPropertySchema(
+    'class',
+    'plain',
+    propertySchema || getClassSchema(classType).getProperty(propertyName),
+  )(propertyValue);
 }
 
 /**
  * Converts a result type of a method from class to plain.
  */
 export function methodResultPlainToClass<T>(classType: ClassType<T>, methodName: string, value: any): any {
-    const schema = getClassSchema(classType);
-    return createJITConverterFromPropertySchema('plain', 'class', schema.getMethod(methodName))(value);
+  const schema = getClassSchema(classType);
+  return createJITConverterFromPropertySchema('plain', 'class', schema.getMethod(methodName))(value);
 }
 
 /**
  * Clones a class instance deeply.
  */
 export function cloneClass<T>(target: T, parents?: any[]): T {
-    return plainToClass(getClassTypeFromInstance(target), classToPlain(getClassTypeFromInstance(target), target), parents);
+  return plainToClass(
+    getClassTypeFromInstance(target),
+    classToPlain(getClassTypeFromInstance(target), target),
+    parents,
+  );
 }
 
 /**
  * Converts a class instance into a plain object, which can be used with JSON.stringify() to convert it into a JSON string.
  */
 export function classToPlain<T>(classType: ClassType<T>, target: T, options?: { excludeReferences?: boolean }): any {
-    //todo use options again?
-    return jitClassToPlain(classType, target);
+  //todo use options again?
+  return jitClassToPlain(classType, target);
 }
-
 
 /**
  * Takes a regular object with partial fields defined of classType and converts only them into the class variant.
  *
  * Returns a new regular object again.
  */
-export function partialPlainToClass<T, K extends keyof T>(classType: ClassType<T>, target: { [path: string]: any }, parents?: any[]): Partial<{ [F in K]: any }> {
-    return jitPartialPlainToClass(classType, target, parents);
+export function partialPlainToClass<T, K extends keyof T>(
+  classType: ClassType<T>,
+  target: { [path: string]: any },
+  parents?: any[],
+): Partial<{ [F in K]: any }> {
+  return jitPartialPlainToClass(classType, target, parents);
 }
-
 
 /**
  * Takes a object with partial class fields defined of classType and converts only them into the plain variant.
  *
  * Returns a new regular object again.
  */
-export function partialClassToPlain<T, K extends keyof T>(classType: ClassType<T>, target: { [path: string]: any }): Partial<{ [F in K]: any }> {
-    return jitPartialClassToPlain(classType, target);
+export function partialClassToPlain<T, K extends keyof T>(
+  classType: ClassType<T>,
+  target: { [path: string]: any },
+): Partial<{ [F in K]: any }> {
+  return jitPartialClassToPlain(classType, target);
 }
-
 
 /**
  * Take a regular object literal and returns an instance of classType.
@@ -96,12 +131,8 @@ export function partialClassToPlain<T, K extends keyof T>(classType: ClassType<T
  * entity instanceof MyEntity; //true
  * ```
  */
-export function plainToClass<T>(
-    classType: ClassType<T>,
-    data: object,
-    parents?: any[]
-): T {
-    return jitPlainToClass(classType, data, parents);
+export function plainToClass<T>(classType: ClassType<T>, data: object, parents?: any[]): T {
+  return jitPlainToClass(classType, data, parents);
 }
 
 /**
@@ -118,129 +149,125 @@ export function plainToClass<T>(
  * }
  * ```
  */
-export function validatedPlainToClass<T>(
-    classType: ClassType<T>,
-    data: object,
-    parents?: any[]
-): T {
-    const errors = validate(classType, data);
-    if (errors.length) {
-        throw new ValidationFailed(errors);
-    }
+export function validatedPlainToClass<T>(classType: ClassType<T>, data: object, parents?: any[]): T {
+  const errors = validate(classType, data);
+  if (errors.length) {
+    throw new ValidationFailed(errors);
+  }
 
-    return plainToClass(classType, data, parents);
+  return plainToClass(classType, data, parents);
 }
 
 /**
  * @hidden
  */
 export function deleteExcludedPropertiesFor<T>(classType: ClassType<T>, item: any, target: 'mongo' | 'plain') {
-    for (const propertyName of eachKey(item)) {
-        if (isExcluded(classType, propertyName, target)) {
-            delete item[propertyName];
-        }
+  for (const propertyName of eachKey(item)) {
+    if (isExcluded(classType, propertyName, target)) {
+      delete item[propertyName];
     }
+  }
 }
 
 /**
  * @hidden
  */
 export function getIdField<T>(classType: ClassType<T>): (keyof T & string) | undefined {
-    return getClassSchema(classType).idField;
+  return getClassSchema(classType).idField;
 }
 
 /**
  * @hidden
  */
 export function getDecorator<T>(classType: ClassType<T>): string | undefined {
-    return getClassSchema(classType).decorator;
+  return getClassSchema(classType).decorator;
 }
 
 /**
  * @hidden
  */
 export function getRegisteredProperties<T>(classType: ClassType<T>): string[] {
-    return getClassSchema(classType).propertyNames;
+  return getClassSchema(classType).propertyNames;
 }
 
 /**
  * @hidden
  */
 export function isArrayType<T>(classType: ClassType<T>, property: string): boolean {
-    return getClassSchema(classType).getProperty(property).isArray;
+  return getClassSchema(classType).getProperty(property).isArray;
 }
 
 /**
  * @hidden
  */
 export function isMapType<T>(classType: ClassType<T>, property: string): boolean {
-    return getClassSchema(classType).getProperty(property).isMap;
+  return getClassSchema(classType).getProperty(property).isMap;
 }
 
 /**
  * @hidden
  */
 export function isEnumAllowLabelsAsValue<T>(classType: ClassType<T>, property: string): boolean {
-    return getClassSchema(classType).getProperty(property).allowLabelsAsValue;
+  return getClassSchema(classType).getProperty(property).allowLabelsAsValue;
 }
 
 /**
  * @hidden
  */
 export function isExcluded<T>(classType: ClassType<T>, property: string, wantedTarget: string): boolean {
-    const mode = getClassSchema(classType).getProperty(property).exclude;
+  const mode = getClassSchema(classType).getProperty(property).exclude;
 
-    if ('all' === mode) {
-        return true;
-    }
+  if ('all' === mode) {
+    return true;
+  }
 
-    return mode === wantedTarget;
+  return mode === wantedTarget;
 }
 
 export function getEntityName<T>(classType: ClassType<T>): string {
-    const name = getClassSchema(classType).name;
+  const name = getClassSchema(classType).name;
 
-    if (!name) {
-        throw new Error('No @Entity() defined for class ' + getClassName(classType));
-    }
+  if (!name) {
+    throw new Error('No @Entity() defined for class ' + getClassName(classType));
+  }
 
-    return name;
+  return name;
 }
 
 /**
  * @hidden
  */
 export function getDatabaseName<T>(classType: ClassType<T>): string | undefined {
-    return getClassSchema(classType).databaseName;
+  return getClassSchema(classType).databaseName;
 }
 
 /**
  * @hidden
  */
 export function getCollectionName<T>(classType: ClassType<T>): string | undefined {
-    return getClassSchema(classType).collectionName;
+  return getClassSchema(classType).collectionName;
 }
 
 /**
  * @hidden
  */
 export function applyDefaultValues<T>(classType: ClassType<T>, value: { [name: string]: any }): object {
-    if (!isObject(value)) return {};
+  if (!isObject(value)) return {};
 
-    const valueWithDefaults = value;
-    const instance = plainToClass(classType, value);
-    const entitySchema = getClassSchema(classType);
+  const valueWithDefaults = value;
+  const instance = plainToClass(classType, value);
+  const entitySchema = getClassSchema(classType);
 
-    for (const [i, v] of entitySchema.getClassProperties().entries()) {
-        if (undefined === value[i] || null === value[i]) {
-            const decoratedProp = v.getForeignClassDecorator();
-            if (decoratedProp) {
-                valueWithDefaults[i] = (instance as any)[i][decoratedProp.name];
-            } else {
-                valueWithDefaults[i] = (instance as any)[i];
-            }
-        }
+  for (const [i, v] of entitySchema.getClassProperties().entries()) {
+    if (undefined === value[i] || null === value[i]) {
+      const decoratedProp = v.getForeignClassDecorator();
+      if (decoratedProp) {
+        valueWithDefaults[i] = (instance as any)[i][decoratedProp.name];
+      } else {
+        valueWithDefaults[i] = (instance as any)[i];
+      }
     }
+  }
 
-    return valueWithDefaults;
+  return valueWithDefaults;
 }
